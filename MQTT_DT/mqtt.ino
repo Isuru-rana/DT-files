@@ -1,13 +1,26 @@
 void MQTTsubscribe() {
   // Subscribe to your MQTT topics here
   client.subscribe("example");
-  
+
   // Add additional topics as needed
   // client.subscribe("home/livingroom/temperature");
   // client.subscribe("home/garden/humidity");
 }
 
 void callBack(char* topic, byte* payload, unsigned int length) {
+  /*
+    Received data from MQTT will be processed here.
+    Template for JSON strings:
+
+    Example topic: example
+    Example payload:
+
+    {
+      "device": "ESP8266",
+      "State": 1
+    }
+    */
+
   // This line indicates the receipt of a message
   Serial.println("Message arrived in topic: " + String(topic));
 
@@ -20,6 +33,8 @@ void callBack(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message: ");
   Serial.println(message);
 
+
+  // Seperate individual values form the JSON buffer
   DynamicJsonDocument jsonBuffer(512);
   DeserializationError error = deserializeJson(jsonBuffer, message);
 
@@ -36,7 +51,7 @@ void callBack(char* topic, byte* payload, unsigned int length) {
       Serial.println("Missing required keys in the message");
       return;
     }
-    
+
     // Save each key data to variables
     const char* device = jsonBuffer["device"];
     bool state = jsonBuffer["State"];
@@ -49,7 +64,7 @@ void callBack(char* topic, byte* payload, unsigned int length) {
     if (strcmp(device, "ESP32") == 0) {
       // Do something if the device is "ESP32"
       Serial.println("This message is for this ESP32 device");
-      
+
       if (state) {
         // Do something if state is equal to 1
         Serial.println("Turning ON something based on the message");
@@ -61,7 +76,7 @@ void callBack(char* topic, byte* payload, unsigned int length) {
       }
     }
   }
-  
+
   // Add more topic handlers as needed
   /*
   else if (String(topic) == "home/livingroom/temperature") {
@@ -78,21 +93,21 @@ void publishData() {
   // Only publish at specific intervals
   if (millis() - lastPublishTime > publishInterval) {
     lastPublishTime = millis();
-    
+
     // Example: create a JSON document to publish
     DynamicJsonDocument doc(256);
     doc["device"] = "ESP32";
     doc["status"] = "active";
-    doc["uptime"] = millis() / 1000; // uptime in seconds
-    
+    doc["uptime"] = millis() / 1000;  // uptime in seconds
+
     // Add sensor readings if available
     // doc["temperature"] = readTemperature();
     // doc["humidity"] = readHumidity();
-    
+
     // Serialize JSON to string
     char buffer[256];
     size_t n = serializeJson(doc, buffer);
-    
+
     // Publish to MQTT topic
     if (client.connected()) {
       if (client.publish("esp32/status", buffer, n)) {

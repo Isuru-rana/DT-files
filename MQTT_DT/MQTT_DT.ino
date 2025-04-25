@@ -21,7 +21,7 @@ PubSubClient client(espClient);
 unsigned long lastReconnectAttempt = 0;
 const unsigned long reconnectInterval = 5000;  // 5 seconds between reconnect attempts
 unsigned long lastPublishTime = 0;
-const unsigned long publishInterval = 10000;   // 10 seconds between MQTT publishes
+const unsigned long publishInterval = 10000;  // 10 seconds between MQTT publishes
 
 void setup() {
   Serial.begin(115200);
@@ -67,7 +67,7 @@ void reconnect() {
   }
   if (millis() - lastReconnectAttempt > reconnectInterval) {
     lastReconnectAttempt = millis();
-    
+
     Serial.print("Attempting MQTT connection...");
     if (client.connect(mqtt_client_id, mqtt_user, mqtt_pass)) {
       Serial.println("connected");
@@ -90,15 +90,15 @@ void checkWiFiConnection() {
 void loop() {
   // Check WiFi connection periodically
   checkWiFiConnection();
-  
+
   // Handle MQTT connection
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
-  
+
   // Publish data periodically
   publishData();
-  
+
   // Add any other periodic tasks here
 }
